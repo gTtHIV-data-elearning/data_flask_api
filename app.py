@@ -1,14 +1,18 @@
 from flask import Flask, render_template, request, jsonify
-import os, pickle, json
+import os, pickle, json, sys
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append('src')
 
 import recommendations
 import course_abandon_prediction
 
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+print(os.getcwd())
 
 app = Flask(__name__, template_folder = 'templates/')
 app.config['DEBUG'] = True

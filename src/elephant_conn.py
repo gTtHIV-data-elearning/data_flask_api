@@ -14,7 +14,7 @@ def elephant_conn():
         a cursor object to that connection
     '''
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read('misc/config.ini')
 
     db_host = config['elesqldb']['host']
     db_port = int(config['elesqldb']['port'])
