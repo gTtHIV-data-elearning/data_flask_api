@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os, pickle, json, sys
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
 import pandas as pd
 
 set_dir = os.path.dirname(os.path.abspath(__file__))
@@ -10,6 +11,7 @@ sys.path.append('src')
 
 import recommendations
 import course_abandon_prediction
+import predict_preproc
 
 
 app = Flask(__name__, template_folder = 'templates/')
@@ -46,13 +48,14 @@ def retrain():
 
     X, y, _ = course_abandon_prediction.create_data_aban_model()
 
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    pipe = Pipeline([
+        ('scaler', StandardScaler()), 
+        ('rfc', RandomForestClassifier(random_state = 17, n_estimators = 51, max_depth = 3))])
 
-    model = RandomForestClassifier(random_state=17, n_estimators=51, max_depth=15).fit(X_scaled, y)
+    pipe.fit(X.values, y)
 
-    with open('model/model.pkl', 'wb') as f:
-        pickle.dump(model, f)
+    with open('model/model_pipe.pkl', 'wb') as f:
+        pickle.dump(pipe, f)
 
     return 'Model Retrained'
 
@@ -60,19 +63,20 @@ def retrain():
 
 @app.route('/predict_abandon', methods=['GET'])
 def predict():
+    args = request.args.to_dict()
+    user_id = int(args.get("user_id"))
 
-    row_json = request.get_json()
-    #row_dict = json.loads(row_json)
-    new_data = pd.DataFrame.from_dict(row_json, orient = 'index').T
+    df = predict_preproc.return_for_predict(user_id)
 
-    model = pickle.load(open('model/model.pkl', 'rb'))
+    model = pickle.load(open('model/model_pipe.pkl', 'rb'))
 
-    prediction = model.predict(new_data)
+    prediction = model.predict(df.values)
     mapping = {
         0: 'not_abandon',
         1: 'will_abandon'}
-    prediction_str = mapping[prediction[0]]
     
+    prediction_str = mapping[prediction[0]]
+
     return jsonify({'Prediction': prediction_str})
 
 

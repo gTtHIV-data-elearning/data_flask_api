@@ -2,9 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FlaskBlog</title>
+    <title>gTt-HIV e-learning Platform Data Solutions API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        h1 {
+            text-align: center;
+            color: #444444;
+            margin-top: 50px;
+            margin-bottom: 30px;
+        }
+        p {
+            text-align: center;
+            font-size: 18px;
+            line-height: 1.5;
+            color: #666666;
+        }
+        code {
+            background-color: #f2f2f2;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 18px;
+            color: #0c0c0c;
+        }
+    </style>
 </head>
 <body>
-   <h1>Welcome to FlaskBlog</h1>
+    <header>
+        <h1>gTt-HIV e-learning Platform Data Solutions API</h1>
+    </header>
+    <main>
+        <p>This is the API that offers models that are intergrated with the gTt-HIV e-leaning platform</p>
+        <p>This API has 3 endpoints:<br><code>/recom</code> which uses GET<br><code>/retrain_abandon</code> which uses POST<br><code>/predict_abandon</code> which uses GET</p>
+        <p>1)To use <code>/recom</code> two parameters are required:<br><code>user_id</code><br><code>course_id</code><br>e.g.<code>/recom?user_id=5&amp;course_id=6</code><br>This returns a JSON</p>
+        <p>2) Accessing the <code>/retrain_abandon</code> endpoint with the <code>POST</code> method will trigger a retrain of the abandonment prediction model on the latest data from the postgreSQL DB</p>
+        <p>3) To use the <code>/predict_abandon</code> endpoint, one parameter is required:<br><code>user_id</code><br>This return a prediction of abandonment for that user.</p>
+    </main>
 </body>
 </html>
