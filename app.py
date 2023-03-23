@@ -4,15 +4,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+set_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(set_dir)
 sys.path.append('src')
 
 import recommendations
 import course_abandon_prediction
 
-
-
-print(os.getcwd())
 
 app = Flask(__name__, template_folder = 'templates/')
 app.config['DEBUG'] = True
@@ -46,17 +44,17 @@ def get_recomendations():
 @app.route('/retrain_abandon', methods = ['POST'])
 def retrain():
 
-    data = course_abandon_prediction.get_data()
+    X, y, _ = course_abandon_prediction.create_data_aban_model()
 
-    X = data.iloc[:, :-1]
-    y = data.iloc[:, -1]
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
     model = RandomForestClassifier(random_state=17, n_estimators=51, max_depth=15).fit(X_scaled, y)
 
-    with open('model.pkl', 'wb') as f:
-        pickle.dump(model)
+    with open('model/model.pkl', 'wb') as f:
+        pickle.dump(model, f)
+
+    return 'Model Retrained'
 
 
 
@@ -64,24 +62,19 @@ def retrain():
 def predict():
 
     row_json = request.get_json()
-    row_dict = json.loads(row_json)
-    new_data = pd.DataFrame.from_dict(row_dict, orient = 'index').T
+    #row_dict = json.loads(row_json)
+    new_data = pd.DataFrame.from_dict(row_json, orient = 'index').T
 
-    model = pickle.load(open('model.pkl', 'rb'))
+    model = pickle.load(open('model/model.pkl', 'rb'))
 
     prediction = model.predict(new_data)
     mapping = {
-    1: 'Ha completado más de 2 cursos',
-    2: 'Abandono',
-    3: 'Tiene cursos no superados',
-    4: 'Tiene cursos pendientes',
-    5: 'No tiene cursos empezados'}
+        0: 'not_abandon',
+        1: 'will_abandon'}
     prediction_str = mapping[prediction[0]]
     
-    return jsonify({'Prediction': prediction_str}), 200
+    return jsonify({'Prediction': prediction_str})
 
 
-
-
-#if __name__ == "__main__":
-#    app.run(host = 'localhost', port = 5000, debug = True)
+if __name__ == "__main__":
+    app.run(host = 'localhost', port = 5000, debug = True)
